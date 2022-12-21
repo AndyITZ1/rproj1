@@ -10,7 +10,7 @@ import java.util.ArrayList;
 public class UserDAO implements UserDAOInterface {
 
     @Override
-    public ArrayList<User> getUsers() {
+    public ArrayList<User> getAllUsers() {
 
         try (Connection conn = ConnectionUtil.getConnection()) {
 
@@ -48,6 +48,32 @@ public class UserDAO implements UserDAOInterface {
     }
 
     @Override
+    public User getUserById(int id) {
+        try (Connection conn = ConnectionUtil.getConnection()) {
+            String sql = "SELECT * FROM ers_users WHERE user_id = ?";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                User user = new User(
+                        rs.getInt("user_id"),
+                        rs.getString("ers_username"),
+                        rs.getString("ers_password"),
+                        rs.getString("user_first_name"),
+                        rs.getString("user_last_name"),
+                        null
+                );
+                
+            }
+
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
     public User insertUser(User user) {
 
         try (Connection conn = ConnectionUtil.getConnection()) {
@@ -67,6 +93,22 @@ public class UserDAO implements UserDAOInterface {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    public boolean updateUserRole(int id, int roleId) {
+        try (Connection conn = ConnectionUtil.getConnection()) {
+            String sql = "UPDATE ers_users SET user_role_id_fk = ? WHERE user_id = ?;";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, roleId);
+            ps.setInt(2, id);
+            ps.executeUpdate();
+            return true;
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     @Override
