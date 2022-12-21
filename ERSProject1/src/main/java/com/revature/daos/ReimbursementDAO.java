@@ -204,6 +204,15 @@ public class ReimbursementDAO implements ReimbursementDAOInterface{
     public boolean updateReimbursementStatus(int id, String status) {
         try (Connection conn = ConnectionUtil.getConnection()) {
             String sql = "UPDATE ers_reimbursements SET reimb_status_id_fk = ? WHERE reimb_id = ?;";
+            ReimbursementStatusDAO rSDAO = new ReimbursementStatusDAO();
+            PreparedStatement ps = conn.prepareStatement(sql);
+
+            // NOTE: If 'status' is not a valid/existing status, then the FK constraint will throw an error
+            // This is done on the database side of things.
+            ps.setInt(1, rSDAO.getReimbursementStatusIdByStatus(status));
+            ps.setInt(2, id);
+            ps.executeUpdate();
+            return true;
         }
         catch (SQLException e) {
             e.printStackTrace();
@@ -214,7 +223,11 @@ public class ReimbursementDAO implements ReimbursementDAOInterface{
     @Override
     public boolean deleteReimbursementById(int id) {
         try (Connection conn = ConnectionUtil.getConnection()) {
-
+            String sql = "DELETE FROM ers_reimbursements WHERE reimb_id = ?;";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, id);
+            ps.executeUpdate();
+            return true;
         }
         catch (SQLException e) {
             e.printStackTrace();

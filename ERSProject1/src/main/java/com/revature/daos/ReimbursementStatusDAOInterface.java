@@ -6,4 +6,6 @@ public interface ReimbursementStatusDAOInterface {
 
     ReimbursementStatus getReimbursementStatusById(int id);
 
+    int getReimbursementStatusIdByStatus(String status);
+
 }

@@ -36,4 +36,21 @@ public class ReimbursementStatusDAO implements ReimbursementStatusDAOInterface{
 
         return null;
     }
+
+    @Override
+    public int getReimbursementStatusIdByStatus(String status) {
+        try (Connection conn = ConnectionUtil.getConnection()) {
+            String sql = "SELECT reimb_status_id FROM ers_reimbursement_statuses WHERE reimb_status = ?;";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, status);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("reimb_status_id");
+            }
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 }
