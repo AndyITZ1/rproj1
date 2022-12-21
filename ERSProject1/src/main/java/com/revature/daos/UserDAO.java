@@ -80,10 +80,25 @@ public class UserDAO implements UserDAOInterface {
             String sql = "INSERT INTO ers_users(ers_username, ers_password, user_first_name, user_last_name, user_role_id_fk) VALUES (?, ?, ?, ?, ?);";
 
             PreparedStatement ps = conn.prepareStatement(sql);
+
             ps.setString(1, user.getErs_username());
             ps.setString(2, user.getErs_password());
-            ps.setString(3, user.getUser_first_name());
-            ps.setString(4, user.getUser_last_name());
+
+            String fName = user.getUser_first_name();
+            if (fName == null) {
+                ps.setNull(3, Types.VARCHAR);
+            }
+            else {
+                ps.setString(3, fName);
+            }
+
+            String lName = user.getUser_last_name();
+            if (lName == null) {
+                ps.setNull(4, Types.VARCHAR);
+            }
+            else {
+                ps.setString(4, lName);
+            }
             ps.setInt(5, user.getUser_role_id_fk());
 
             ps.executeUpdate();

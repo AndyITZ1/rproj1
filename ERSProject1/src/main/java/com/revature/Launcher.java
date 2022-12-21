@@ -1,5 +1,8 @@
 package com.revature;
 
+import com.revature.controllers.AuthController;
+import com.revature.controllers.ReimbursementController;
+import com.revature.controllers.UserController;
 import com.revature.utils.ConnectionUtil;
 import io.javalin.Javalin;
 
@@ -26,6 +29,25 @@ public class Launcher {
                 }
         ).start(3000);
         // Running on localhost:3000
+
+        // Controllers
+        AuthController ac = new AuthController();
+        UserController uc = new UserController();
+        ReimbursementController rc = new ReimbursementController();
+
+        // Login & Register Endpoints
+        app.post("/register", ac.registerHandler);
+        app.post("/login", ac.loginHandler);
+
+        // Reimbursement Endpoints
+        app.get("/reimbursements", null);
+        app.post("/reimbursements", rc.insertReimbursementHandler);
+        app.patch("/reimbursements/{id}", null);
+        app.get("/reimbursements?status={status}", null);
+        app.get("/reimbursements?requester={id}", null);
+
+
+
 
 
     }

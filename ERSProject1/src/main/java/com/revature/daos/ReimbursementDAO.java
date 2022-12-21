@@ -183,21 +183,21 @@ public class ReimbursementDAO implements ReimbursementDAOInterface{
     }
 
     @Override
-    public Reimbursement insertReimbursement(Reimbursement reimb) {
+    public boolean insertReimbursement(double amount, String description, int user_id) {
         try (Connection conn = ConnectionUtil.getConnection()) {
             String sql = "INSERT INTO ers_reimbursements(reimb_amount, reimb_description, requester_id_fk) " +
                     "VALUES (?, ?, ?);";
             PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setDouble(1, reimb.getReimb_amount());
-            ps.setString(2, reimb.getReimb_description());
-            ps.setInt(3, reimb.getRequester_id_fk());
+            ps.setDouble(1, amount);
+            ps.setString(2, description);
+            ps.setInt(3, user_id);
             ps.executeUpdate();
-            return reimb;
+            return true;
         }
         catch (SQLException e) {
             e.printStackTrace();
         }
-        return null;
+        return false;
     }
 
     @Override

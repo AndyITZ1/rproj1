@@ -39,6 +39,17 @@ public class User {
         this.user_role_id_fk = user_role_id_fk;
     }
 
+    public User(String ers_username, String ers_password, int user_role_id_fk) {
+        this.ers_username = ers_username;
+        this.ers_password = ers_password;
+        this.user_role_id_fk = user_role_id_fk;
+    }
+
+    public User(String ers_username, String ers_password) {
+        // Constructor Chaining to emulate default parameter values
+        this(ers_username, ers_password, 1);
+    }
+
     public int getUser_id() {
         return user_id;
     }

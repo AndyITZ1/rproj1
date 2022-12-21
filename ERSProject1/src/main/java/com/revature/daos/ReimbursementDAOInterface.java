@@ -10,7 +10,7 @@ public interface ReimbursementDAOInterface {
     ArrayList<Reimbursement> getAllReimbursements();
     ArrayList<Reimbursement> getAllPendingReimbursements();
     ArrayList<Reimbursement> getReimbursementsByUserId(int id);
-    Reimbursement insertReimbursement(Reimbursement reimb);
+    boolean insertReimbursement(double amount, String description, int user_id);
     boolean updateReimbursementStatus(int id, String status);
     boolean deleteReimbursementById(int id);
 
