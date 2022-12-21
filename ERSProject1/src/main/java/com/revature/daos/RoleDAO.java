@@ -35,4 +35,19 @@ public class RoleDAO implements RoleDAOInterface{
 
         return null;
     }
+
+    @Override
+    public int getRoleIdByRoleTitle(String title) {
+        try (Connection conn = ConnectionUtil.getConnection()) {
+            String sql = "SELECT user_role_id FROM ers_user_roles WHERE user_role = ?";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, title);
+            ResultSet rs = ps.executeQuery();
+            return rs.getInt("user_role_id");
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 }

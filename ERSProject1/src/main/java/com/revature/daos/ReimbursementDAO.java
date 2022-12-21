@@ -201,16 +201,17 @@ public class ReimbursementDAO implements ReimbursementDAOInterface{
     }
 
     @Override
-    public boolean updateReimbursementStatus(int id, String status) {
+    public boolean updateReimbursementStatus(int id, String status, int resolverId) {
         try (Connection conn = ConnectionUtil.getConnection()) {
-            String sql = "UPDATE ers_reimbursements SET reimb_status_id_fk = ? WHERE reimb_id = ?;";
+            String sql = "UPDATE ers_reimbursements SET reimb_status_id_fk = ?, resolver_id_fk = ? WHERE reimb_id = ?;";
             ReimbursementStatusDAO rSDAO = new ReimbursementStatusDAO();
             PreparedStatement ps = conn.prepareStatement(sql);
 
             // NOTE: If 'status' is not a valid/existing status, then the FK constraint will throw an error
             // This is done on the database side of things.
             ps.setInt(1, rSDAO.getReimbursementStatusIdByStatus(status));
-            ps.setInt(2, id);
+            ps.setInt(2, resolverId);
+            ps.setInt(3, id);
             ps.executeUpdate();
             return true;
         }
