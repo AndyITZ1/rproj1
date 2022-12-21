@@ -69,14 +69,16 @@ public class ReimbursementDAO implements ReimbursementDAOInterface{
     }
 
     @Override
-    public ArrayList<Reimbursement> getAllPendingReimbursements() {
+    public ArrayList<Reimbursement> getReimbursementsByStatus(String status) {
         try (Connection conn = ConnectionUtil.getConnection()) {
             String sql = "SELECT * FROM ers_reimbursements WHERE reimb_status_id_fk = " +
-                    "(SELECT reimb_status_id FROM ers_reimbursement_statuses WHERE reimb_status = 'Pending');";
-            Statement s = conn.createStatement();
-            ResultSet rs = s.executeQuery(sql);
+                    "(SELECT reimb_status_id FROM ers_reimbursement_statuses WHERE reimb_status = ?);";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, status);
+            ResultSet rs = ps.executeQuery();
             ArrayList<Reimbursement> reimbursementList = new ArrayList();
             while (rs.next()) {
+                System.out.println("HEY I'M HERE");
                 Reimbursement r = new Reimbursement(
                         rs.getInt("reimb_id"),
                         rs.getDouble("reimb_amount"),
@@ -175,6 +177,61 @@ public class ReimbursementDAO implements ReimbursementDAOInterface{
                 reimbursementList.add(r);
             }
             return reimbursementList;
+        }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public Reimbursement getReimbursementById(int id) {
+        try (Connection conn = ConnectionUtil.getConnection()) {
+            String sql = "SELECT * FROM ers_reimbursements WHERE reimb_id = ?";
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setInt(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                Reimbursement r = new Reimbursement(
+                        rs.getInt("reimb_id"),
+                        rs.getDouble("reimb_amount"),
+                        rs.getString("reimb_description"),
+                        null,
+                        null,
+                        null,
+                        null
+                );
+                // Setting Requester User
+                int requesterFK = rs.getInt("requester_id_fk");
+                UserDAO uDAO = new UserDAO();
+                User requester = uDAO.getUserById(requesterFK);
+                r.setRequester(requester);
+                r.setRequester_id_fk(requesterFK);
+
+                // Setting Resolver User
+                int resolverFK = rs.getInt("resolver_id_fk");
+                if (resolverFK != 0) {
+                    User resolver = uDAO.getUserById(resolverFK);
+                    r.setResolver(resolver);
+                    r.setResolver_id_fk(resolverFK);
+                }
+
+                // Setting Reimbursement Type
+                int reimbTypeFK = rs.getInt("reimb_type_id_fk");
+                ReimbursementTypeDAO rTDAO = new ReimbursementTypeDAO();
+                ReimbursementType reimbursementType = rTDAO.getReimbursementTypeById(reimbTypeFK);
+                r.setReimb_type(reimbursementType);
+                r.setReimb_type_id_fk(reimbTypeFK);
+
+                // Setting Reimbursement Status
+                int reimbStatusFK = rs.getInt("reimb_status_id_fk");
+                ReimbursementStatusDAO rSDAO = new ReimbursementStatusDAO();
+                ReimbursementStatus reimbursementStatus = rSDAO.getReimbursementStatusById(reimbStatusFK);
+                r.setReimb_status(reimbursementStatus);
+                r.setReimb_status_id_fk(reimbStatusFK);
+
+                return r;
+            }
         }
         catch (SQLException e) {
             e.printStackTrace();

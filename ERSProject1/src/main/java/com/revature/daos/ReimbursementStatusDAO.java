@@ -24,7 +24,7 @@ public class ReimbursementStatusDAO implements ReimbursementStatusDAOInterface{
             if (rs.next()) {
                 ReimbursementStatus reimbStatus = new ReimbursementStatus(
                         rs.getInt("reimb_status_id"),
-                        rs.getString("reimh_status")
+                        rs.getString("reimb_status")
                 );
 
                 return reimbStatus;

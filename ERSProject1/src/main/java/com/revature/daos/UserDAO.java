@@ -63,7 +63,12 @@ public class UserDAO implements UserDAOInterface {
                         rs.getString("user_last_name"),
                         null
                 );
-                
+
+                int userRoleFK = rs.getInt("user_role_id_fk");
+                RoleDAO rDAO = new RoleDAO();
+                user.setRole(rDAO.getRoleById(userRoleFK));
+                user.setUser_role_id_fk(userRoleFK);
+                return user;
             }
 
         }

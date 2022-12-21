@@ -15,6 +15,7 @@ public class AuthController {
     public static HttpSession ses;
 
     public Handler loginHandler = (ctx) -> {
+        if (ses != null) {
         String body = ctx.body();
         Gson gson = new Gson();
         AuthDTO aDTO = gson.fromJson(body, AuthDTO.class);

@@ -32,7 +32,7 @@ public class Launcher {
 
         // Controllers
         AuthController ac = new AuthController();
-        UserController uc = new UserController();
+//        UserController uc = new UserController();
         ReimbursementController rc = new ReimbursementController();
 
         // Login & Register Endpoints
@@ -40,11 +40,18 @@ public class Launcher {
         app.post("/login", ac.loginHandler);
 
         // Reimbursement Endpoints
-        app.get("/reimbursements", null);
+
+        // Get All Reimbursements for Pending
+        app.get("/reimbursements/filter/status={status}", rc.getAllReimbByStatusHandler);
+        // View ALl Reimbursements for an Employee
+        app.get("/reimbursements/filter/requester={id}", rc.getAllPastReimbSubmissionsHandler);
+        // Get All Reimbursements
+        app.get("/reimbursements", rc.getAllReimbursementsHandler);
+        // Submit a Reimbursement Ticket
         app.post("/reimbursements", rc.insertReimbursementHandler);
-        app.patch("/reimbursements/{id}", null);
-        app.get("/reimbursements?status={status}", null);
-        app.get("/reimbursements?requester={id}", null);
+        // Update Status of a Specific Reimbursement
+        app.patch("/reimbursements/{id}", rc.updateReimbStatusHandler);
+
 
 
 

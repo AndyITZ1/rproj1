@@ -2,15 +2,86 @@ package com.revature.controllers;
 
 import com.google.gson.Gson;
 import com.revature.daos.ReimbursementDAO;
+import com.revature.daos.ReimbursementStatusDAO;
 import com.revature.daos.RoleDAO;
+import com.revature.models.Reimbursement;
 import com.revature.models.TicketDTO;
 import io.javalin.http.Handler;
+
+import java.util.ArrayList;
 
 
 public class ReimbursementController {
 
     ReimbursementDAO rDAO = new ReimbursementDAO();
 
+    public Handler getAllReimbursementsHandler = (ctx) -> {
+        RoleDAO roleDAO = new RoleDAO();
+        if (AuthController.ses != null) {
+            if ((Integer) AuthController.ses.getAttribute("user_role_id")
+                    == roleDAO.getRoleIdByRoleTitle("Manager")) {
+                ArrayList<Reimbursement> reimbursements = rDAO.getAllReimbursements();
+                Gson gson = new Gson();
+                String JSONReimbursements = gson.toJson(reimbursements);
+                ctx.result(JSONReimbursements);
+                ctx.status(202);
+            }
+            else {
+                ctx.result("You are not authorized to perform this functionality!");
+                ctx.status(401);
+            }
+        }
+        else {
+            ctx.result("You must be logged in to see this!");
+            ctx.status(401);
+        }
+    };
+
+    public Handler getAllPastReimbSubmissionsHandler = (ctx) -> {
+        if (AuthController.ses != null) {
+            int viewUser = Integer.parseInt(ctx.pathParam("id"));
+            if ((Integer) AuthController.ses.getAttribute("user_id") == viewUser) {
+                ArrayList<Reimbursement> reimbursements =
+                        rDAO.getReimbursementsByUserId(Integer.parseInt(ctx.pathParam("id")));
+                Gson gson = new Gson();
+                String JSONReimbursements = gson.toJson(reimbursements);
+                ctx.result(JSONReimbursements);
+                ctx.status(202);
+            }
+            else {
+                ctx.result("You are not authorized to view this user's records!");
+                ctx.status(401);
+            }
+        }
+        else {
+            ctx.result("You must be logged in to see this!");
+            ctx.status(401);
+        }
+    };
+
+    public Handler getAllReimbByStatusHandler = (ctx) -> {
+        RoleDAO roleDAO = new RoleDAO();
+        if (AuthController.ses != null) {
+            if ((Integer) AuthController.ses.getAttribute("user_role_id")
+                    == roleDAO.getRoleIdByRoleTitle("Manager")) {
+
+                ArrayList<Reimbursement> reimbursements = rDAO.getReimbursementsByStatus(ctx.pathParam("status"));
+                System.out.println(ctx.pathParam("status"));
+                Gson gson = new Gson();
+                String JSONReimbursements = gson.toJson(reimbursements);
+                ctx.result(JSONReimbursements);
+                ctx.status(202);
+            }
+            else {
+                ctx.result("You are not authorized to perform this functionality!");
+                ctx.status(401);
+            }
+        }
+        else {
+            ctx.result("You must be logged in to see this!");
+            ctx.status(401);
+        }
+    };
     public Handler updateReimbStatusHandler = (ctx) -> {
         RoleDAO roleDAO = new RoleDAO();
         if (AuthController.ses != null) {
@@ -19,15 +90,22 @@ public class ReimbursementController {
 
                 String newStatus = ctx.body();
                 int reimbID = Integer.parseInt(ctx.pathParam("id"));
-
-                if (rDAO.updateReimbursementStatus(reimbID, newStatus,
-                        (Integer) AuthController.ses.getAttribute("user_id"))) {
-                    ctx.status(202);
-                    ctx.result("Processed Ticket ID: " + reimbID);
+                ReimbursementStatusDAO rSDAO = new ReimbursementStatusDAO();
+                if (rDAO.getReimbursementById(reimbID).getReimb_status_id_fk() != rSDAO.getReimbursementStatusIdByStatus("Pending"))
+                {
+                    ctx.status(401);
+                    ctx.result("Processing NOT ALLOWED! This reimbursement ticket has been processed already.");
                 }
                 else {
-                    ctx.status(406);
-                    ctx.result("Ticket was unable to process.");
+                    if (rDAO.updateReimbursementStatus(reimbID, newStatus,
+                            (Integer) AuthController.ses.getAttribute("user_id"))) {
+                        ctx.status(202);
+                        ctx.result("Processed Ticket ID: " + reimbID);
+                    }
+                    else {
+                        ctx.status(406);
+                        ctx.result("Ticket was unable to process.");
+                    }
                 }
             }
             else {

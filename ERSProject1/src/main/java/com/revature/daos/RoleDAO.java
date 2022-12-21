@@ -43,7 +43,9 @@ public class RoleDAO implements RoleDAOInterface{
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, title);
             ResultSet rs = ps.executeQuery();
-            return rs.getInt("user_role_id");
+            if (rs.next()) {
+                return rs.getInt("user_role_id");
+            }
         }
         catch (SQLException e) {
             e.printStackTrace();
