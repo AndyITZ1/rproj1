@@ -18,20 +18,26 @@ public class AuthController {
         String body = ctx.body();
         Gson gson = new Gson();
         AuthDTO aDTO = gson.fromJson(body, AuthDTO.class);
-        User loggedInUser = aDAO.login(aDTO.getUsername(), aDTO.getPassword());
-        if (loggedInUser != null) {
-            ses = ctx.req.getSession();
-
-            ses.setAttribute("user_role_id", loggedInUser.getUser_role_id_fk());
-            ses.setAttribute("user_id", loggedInUser.getUser_id());
-
-            String userJSON = gson.toJson(loggedInUser);
-
-            ctx.result(userJSON);
-            ctx.status(202);
+        if (aDTO == null || aDTO.getPassword() == null || aDTO.getUsername() == null) {
+            ctx.status(406);
+            ctx.result("Failed to login! Need both a username and password to LOGIN!");
         }
         else {
-            ctx.status(401);
+            User loggedInUser = aDAO.login(aDTO.getUsername(), aDTO.getPassword());
+            if (loggedInUser != null) {
+                ses = ctx.req.getSession();
+
+                ses.setAttribute("user_role_id", loggedInUser.getUser_role_id_fk());
+                ses.setAttribute("user_id", loggedInUser.getUser_id());
+
+                String userJSON = gson.toJson(loggedInUser);
+
+                ctx.result(userJSON);
+                ctx.status(202);
+            } else {
+                ctx.status(406);
+                ctx.result("Login failed due to server-side error. Please try again later!");
+            }
         }
     };
 
@@ -39,7 +45,7 @@ public class AuthController {
         String body = ctx.body();
         Gson gson = new Gson();
         AuthDTO aDTO = gson.fromJson(body, AuthDTO.class);
-        if (aDTO.getPassword() == null || aDTO.getUsername() == null) {
+        if (aDTO == null || aDTO.getPassword() == null || aDTO.getUsername() == null) {
             ctx.status(400);
             ctx.result("Failed to register! Need both a username and password to REGISTER!");
         }
